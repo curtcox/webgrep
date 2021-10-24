@@ -39,7 +39,7 @@ function showResult(str) {
 """
 
 def searchFor(x) {
-    "<pre>" + ("grep $x search".execute().text) + "</pre>"
+    "<pre>" + ("./search_script $x".execute().text) + "</pre>"
 }
 
 HttpServer.create(new InetSocketAddress(port), backlog).with {
