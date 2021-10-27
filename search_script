@@ -1,4 +1,4 @@
-#!/usr/bin/env groovy
+#!/usr/bin/env groovyclient
 @Grab( 'commons-lang:commons-lang:2.6' )
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml
 
