@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-terms = [ "target", "text" ]
+terms = args as List
 File dir = new File(".")
 
 @groovy.transform.Immutable class Hits {
@@ -59,19 +59,39 @@ Match matchFor(String term, String text, int at) {
     new Match(term,context,start)
 }
 
+void updateCounts(Map counts, Hits hits) {
+   for(match in hits.matches) {
+       String term = match.term
+       if (counts.containsKey(term)) {
+           counts.put(term,counts.get(term) + 1)
+       } else {
+           counts.put(term,1)
+       }
+   }
+
+}
+
 List<File> listFiles(File dir) { dir.listFiles().findAll { it.isFile() } }
 
 Hits hitsFor(File f) {
     new Hits(matches:matchesFor(f), score:scoreFor(f))
 }
 
-Map<File,Hits> hits = new HashMap<>()
+Map<String,Integer> counts = new HashMap<>()
+Map<File,Hits> allHits = new HashMap<>()
+
 listFiles(dir).forEach(f -> {
-    hits.put(f,hitsFor(f))
+    Hits hits = hitsFor(f)
+    allHits.put(f,hits)
+    updateCounts(counts,hits)
 })
 
-hits = hits.sort {a, b -> b.value.score <=> a.value.score}
+allHits = allHits.sort {a, b -> b.value.score <=> a.value.score}
 
-hits.each {
+counts.each {
+    key, value -> println "$key $value"
+}
+
+allHits.each {
     key, value -> println "$key $value"
 }
