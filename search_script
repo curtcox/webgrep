@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-terms = args as List
+terms = args.findAll { it.length() > 2 }
 File dir = new File(".")
 
 @groovy.transform.Immutable class Hits {

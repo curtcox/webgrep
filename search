@@ -6,37 +6,7 @@ import java.util.regex.Pattern
 int port = 8080
 int backlog = 0
 
-String searchPage =
-"""
-<html>
-  <head>
-    <script>
-function showResult(str) {
-  if (str.length==0) {
-    document.getElementById("search").innerHTML="";
-    return;
-  }
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.onreadystatechange = function() {
-    if (this.readyState==4 && this.status==200) {
-      document.getElementById("search").innerHTML=this.responseText;
-    }
-  }
-  xmlhttp.open("GET","search?q="+str,true);
-  xmlhttp.send();
-}
-    </script>
-  </head>
-  <body>
-
-  <form>
-    <input type="text" size="30" onkeyup="showResult(this.value)">
-      <div id="search"></div>
-  </form>
-
-  </body>
-</html>
-"""
+String searchPage() { new File("search.html").text }
 
 def searchFor(x) { "./search_script $x".execute().text }
 
@@ -46,12 +16,12 @@ HttpServer.create(new InetSocketAddress(port), backlog).with {
         http.responseHeaders.add("Content-type", "text/html")
         http.sendResponseHeaders(200, 0)
         String uri = http.requestURI
-
+        println uri
         if (uri.contains('=')) {
             String value = uri.split(Pattern.quote('='))[1]
             http.responseBody.withWriter { out -> out << searchFor(value) }
         } else {
-            http.responseBody.withWriter { out -> out << searchPage }
+            http.responseBody.withWriter { out -> out << searchPage() }
         }
     }
     start()
