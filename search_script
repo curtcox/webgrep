@@ -1,11 +1,17 @@
 #!/usr/bin/env groovy
 
-terms = [ "red", "blue" ]
-File dir = new File("where_to_search")
+terms = [ "target", "text" ]
+File dir = new File(".")
 
 @groovy.transform.Immutable class Hits {
     List matches
     int score
+}
+
+@groovy.transform.Immutable class Match {
+    String term
+    String context
+    int index
 }
 
 List matchIndices(String target, String text) {
@@ -37,22 +43,24 @@ List matchesFor(File f) {
         String target = term.toLowerCase()
         if (text.contains(target)) {
             for (i : matchIndices(target,text)) {
-                list.add(around(text,i))
+                list.add(matchFor(term,text,i))
             }
         }
     })
     list
 }
 
-String around(String text, int at) {
+Match matchFor(String term, String text, int at) {
     int start = at - 100
     int end   = at + 100
     if (start < 0) start = 0
     if (end   > text.length()) end = text.length()
-    text.substring(start,end)
+    String context = text.substring(start,end)
+    new Match(term,context,start)
 }
 
-List<File> listFiles(File dir) { Arrays.asList(dir.listFiles()) }
+List<File> listFiles(File dir) { dir.listFiles().findAll { it.isFile() } }
+
 Hits hitsFor(File f) {
     new Hits(matches:matchesFor(f), score:scoreFor(f))
 }
