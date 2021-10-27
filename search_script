@@ -81,7 +81,7 @@ void updateCounts(Map counts, Hits hits) {
 
 List<File> listFiles(File dir) { dir.listFiles().findAll { it.isFile() } }
 Hits hitsFor(File f) { new Hits(matches:matchesFor(f), score:scoreFor(f)) }
-String linkTo(File f) { "<a href=\"${f.name}\">${f.name}<a>"}
+String linkTo(File f) { "<a href=\"${f.name}\">${f.name}<a>" }
 
 Map<String,Integer> counts = new HashMap<>()
 Map<File,Hits> allHits = new HashMap<>()
