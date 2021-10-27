@@ -1,4 +1,6 @@
 #!/usr/bin/env groovy
+@Grab( 'commons-lang:commons-lang:2.6' )
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml
 
 terms = args.findAll { it.length() > 2 }
 File dir = new File(".")
@@ -12,7 +14,13 @@ File dir = new File(".")
     String term
     String context
     int index
+    static String highlight(String word) { "<b style=\"color:green; font-size:20px;\">$word</b>" }
+    def toHtml() {
+      String highlighted = highlight(term)
+      escapeHtml(context).replaceAll(term,highlighted)
+    }
 }
+
 
 List matchIndices(String target, String text) {
   List<String> list = new ArrayList()
@@ -89,9 +97,16 @@ listFiles(dir).forEach(f -> {
 allHits = allHits.sort {a, b -> b.value.score <=> a.value.score}
 
 counts.each {
-    key, value -> println "$key $value"
+    term, count -> println "${Match.highlight(term)} $count"
 }
 
+println "</br>"
+
 allHits.each {
-    key, value -> println "$key $value"
+    file, hits -> {
+      println "$file"
+      hits.matches.forEach( match -> {
+         println "${match.toHtml()} </br>"
+      })
+    }
 }

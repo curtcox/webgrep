@@ -6,9 +6,9 @@ import java.util.regex.Pattern
 int port = 8080
 int backlog = 0
 
-String searchPage() { new File("search.html").text }
-
-def searchFor(x) { "./search_script $x".execute().text }
+String searchPage()         { new File("search.html").text }
+String decode(String value) { java.net.URLDecoder.decode(value, "UTF-8") }
+String searchFor(x)         { "./search_script $x".execute().text }
 
 HttpServer.create(new InetSocketAddress(port), backlog).with {
     println "Server is listening on ${port}, hit Ctrl+C to exit."
@@ -16,10 +16,9 @@ HttpServer.create(new InetSocketAddress(port), backlog).with {
         http.responseHeaders.add("Content-type", "text/html")
         http.sendResponseHeaders(200, 0)
         String uri = http.requestURI
-        println uri
         if (uri.contains('=')) {
             String value = uri.split(Pattern.quote('='))[1]
-            http.responseBody.withWriter { out -> out << searchFor(value) }
+            http.responseBody.withWriter { out -> out << searchFor(decode(value)) }
         } else {
             http.responseBody.withWriter { out -> out << searchPage() }
         }
