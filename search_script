@@ -104,9 +104,11 @@ println "</br>"
 
 allHits.each {
     file, hits -> {
-      println "$file"
-      hits.matches.forEach( match -> {
-         println "${match.toHtml()} </br>"
-      })
+      if (!hits.matches.isEmpty()) {
+        println "$file"
+        hits.matches.forEach( match -> {
+           println "${match.toHtml()} </br>"
+        })
+      }
     }
 }
