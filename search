@@ -38,9 +38,7 @@ function showResult(str) {
 </html>
 """
 
-def searchFor(x) {
-    "<pre>" + ("./search_script $x".execute().text) + "</pre>"
-}
+def searchFor(x) { "./search_script $x".execute().text }
 
 HttpServer.create(new InetSocketAddress(port), backlog).with {
     println "Server is listening on ${port}, hit Ctrl+C to exit."

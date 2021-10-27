@@ -1,2 +1,69 @@
-# Put your arbitrary search script here.
-grep -i $1 *
+#!/usr/bin/env groovy
+
+terms = [ "red", "blue" ]
+File dir = new File("where_to_search")
+
+@groovy.transform.Immutable class Hits {
+    List matches
+    int score
+}
+
+List matchIndices(String target, String text) {
+  List<String> list = new ArrayList()
+  int at = 0
+  while((at = text.indexOf(target, at)) != -1) {
+     list.add(at)
+     at += target.length() - 1
+  }
+  list
+}
+
+int scoreFor(File f) {
+    int score = 0
+    String text = f.text.toLowerCase()
+    terms.forEach( term -> {
+        String target = term.toLowerCase()
+        if (text.contains(target)) {
+            score = score + 10000 + matchIndices(target,text).size()
+        }
+    })
+    score
+}
+
+List matchesFor(File f) {
+    List<String> list = new ArrayList()
+    String text = f.text.toLowerCase()
+    terms.forEach( term -> {
+        String target = term.toLowerCase()
+        if (text.contains(target)) {
+            for (i : matchIndices(target,text)) {
+                list.add(around(text,i))
+            }
+        }
+    })
+    list
+}
+
+String around(String text, int at) {
+    int start = at - 100
+    int end   = at + 100
+    if (start < 0) start = 0
+    if (end   > text.length()) end = text.length()
+    text.substring(start,end)
+}
+
+List<File> listFiles(File dir) { Arrays.asList(dir.listFiles()) }
+Hits hitsFor(File f) {
+    new Hits(matches:matchesFor(f), score:scoreFor(f))
+}
+
+Map<File,Hits> hits = new HashMap<>()
+listFiles(dir).forEach(f -> {
+    hits.put(f,hitsFor(f))
+})
+
+hits = hits.sort {a, b -> b.value.score <=> a.value.score}
+
+hits.each {
+    key, value -> println "$key $value"
+}
