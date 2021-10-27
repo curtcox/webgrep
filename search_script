@@ -2,8 +2,8 @@
 @Grab( 'commons-lang:commons-lang:2.6' )
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml
 
-terms = args.findAll { it.length() > 2 }
-File dir = new File(".")
+File dir = new File(args[0])
+terms = args.findAll { !it.contains('/') && it.length() > 2 }
 
 @groovy.transform.Immutable class Hits {
     List matches
@@ -80,10 +80,8 @@ void updateCounts(Map counts, Hits hits) {
 }
 
 List<File> listFiles(File dir) { dir.listFiles().findAll { it.isFile() } }
-
-Hits hitsFor(File f) {
-    new Hits(matches:matchesFor(f), score:scoreFor(f))
-}
+Hits hitsFor(File f) { new Hits(matches:matchesFor(f), score:scoreFor(f)) }
+String linkTo(File f) { "<a href=\"${f.name}\">${f.name}<a>"}
 
 Map<String,Integer> counts = new HashMap<>()
 Map<File,Hits> allHits = new HashMap<>()
@@ -97,7 +95,7 @@ listFiles(dir).forEach(f -> {
 allHits = allHits.sort {a, b -> b.value.score <=> a.value.score}
 
 counts.each {
-    term, count -> println "${Match.highlight(term)} $count"
+    term, count -> println "${Match.highlight(term)} $count matches"
 }
 
 println "</br>"
@@ -105,7 +103,7 @@ println "</br>"
 allHits.each {
     file, hits -> {
       if (!hits.matches.isEmpty()) {
-        println "$file"
+        println linkTo(file)
         hits.matches.forEach( match -> {
            println "${match.toHtml()} </br>"
         })
